@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue May 31 13:24:52 2022
+
+@author: leoes
+"""
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -16,23 +23,27 @@ if __name__ == "__main__":
     suppress_qt_warnings()
 
 # Filter patients with 
-def filter_patient(cc_filter, data):
-    #Filtro CC derecha en dataset
-    patient = cc_filter[cc_filter["left or right breast"].str.startswith(data)] #Dataframe completo
-    #Lista de Pacientes CC derecha o izquierda
-    patient_PI = set(list(patient["patient_id"])) #
+def filter_patient(cc_filter, data, imgView):
+    #Filter for CC cases
+    patient = cc_filter[cc_filter["left or right breast"].str.startswith(data)] # Full Dataframe
+    #patient = cc_filter[cc_filter["image view"].str.startswith(imgView)] # Full Dataframe
+    patient_PI = set(list(patient["patient_id"])) # List of patients CC right or left
+    #patient_PI = list(patient["patient_id"]) # List of patients CC right or left
     #pathology_PI = set(list(patient["pathology"])) #
     #pathology_PI = list(patient["pathology"])
-    if data == 'R':
+    if data == 'R' and imgView == 'CC':
         patient_PI = [i + '_RIGHT_CC' for i in patient_PI]
-    else:
+    elif data == 'L' and imgView == 'CC':
         patient_PI = [i + '_LEFT_CC' for i in patient_PI]
+    if data == 'R' and imgView == 'MLO':
+        patient_PI = [i + '_RIGHT_MLO' for i in patient_PI]
+    elif data == 'L' and imgView == 'MLO':
+        patient_PI = [i + '_LEFT_MLO' for i in patient_PI]
+    
     patient_PI.sort()
     #pathology_PI.sort()
     return patient_PI #, pathology_PI
    
-    
-
     
 def directory_read(metadata,patient_list,data ): #dataframe/ R o L / 
     #Lectura de Directorios de Imagenes Derecha
@@ -117,12 +128,13 @@ def image_proccess(path_R_full, path_R_ROI, data):
         #M = cv2.moments(cnt)
         #Recortamos la imagen
         x,y,w,h = cv2.boundingRect(cnt) #
-        ME = 100
+        ME = 50
         if x-ME <= 0 or y-ME <= 0 or w-ME <= 0 or h-ME <=0:
-            ME = 50
+            ME = 30
             if x-ME <= 0 or y-ME <= 0 or w-ME <= 0 or h-ME <=0:
                 ME = 0
-        imgOut = ImagenInteres[y-ME:y+h+ME, x-ME:x+h+ME]
+        #imgOut = ImagenInteres[y-ME:y+h+ME, x-ME:x+h+ME]
+        imgOut = ImagenInteres[y-ME:y+h+ME, x-ME:x+w+ME]
         
         #Muestra de la región de interés de la mamografía
         plt.figure('Region de Interes de la Mamografía BOX')
@@ -187,26 +199,37 @@ def image_proccess(path_R_full, path_R_ROI, data):
 
     
 '''Main'''
-# Lectura Archivo metadata   
-metadata = pd.read_csv('data/metadata.csv',index_col=False)
+# Reading file "metadata" for images location
+metadata = pd.read_csv('data/metadata.csv',index_col=False) 
 metadata = metadata[metadata["File Location"].str.startswith('.\CBIS-DDSM\Calc-Training')]
-# Lectura Archivo calc_case_description_train_set
-calc_trainig_data_file = pd.read_csv('data/calc_case_description_train_set.csv', index_col=False)
+# Reading file "data_filtered" for the cases and patology
+calc_trainig_data_file = pd.read_csv('data/data_filtered.csv', index_col=False) 
+
 #Filtro CC en dataset
-cc_filter = calc_trainig_data_file[calc_trainig_data_file["image view"].str.startswith('CC')]
+#cc_filter = calc_trainig_data_file[calc_trainig_data_file["image view"].str.startswith('CC')]
+
+pathology_data = calc_trainig_data_file[['patient_id','pathology']]
+
+pathology = calc_trainig_data_file['assessment'].tolist()
+pathology = set(pathology)
 
 
-# Filtro pacientes derecha
-patient_right_cc_PI = filter_patient(cc_filter,'L') # filtro derecha
+''' Filter data with steps:
+        RIGHT-CC,  RIGHT-MLO, LEFT-CC, LEFT-MLO
+'''
 
+# Patient filter - RIGHT CC
+patient_right_cc_PI = filter_patient(calc_trainig_data_file,'R', 'MLO') # filtro derecha
+
+''' DataFrame Cration '''
 # Listas Vacias para el Dataframe
 list_data = []
 # Columnas del DataFrame
 columnas = ['ID','n ROIs', 'ROI', 'Area', 'Perimetro',
-                                      'Densidad', 'Compacidad', 'Contraste', 'Uniformidad']
+                                      'Densidad', 'Compacidad', 'Contraste', 'Uniformidad' ]
 df = pd.DataFrame(list_data, columns=columnas)
 
-patient_right_cc_PI = patient_right_cc_PI[:2] # corremos solo 3 datos porque es tardado procesar todo
+patient_right_cc_PI = patient_right_cc_PI[:1] # corremos solo 3 datos porque es tardado procesar todo
 for full in range(len(patient_right_cc_PI)):
     # Lectura de directorios
     path_R_full, path_R_ROI, data = directory_read(metadata,patient_right_cc_PI, full)
@@ -219,26 +242,58 @@ for full in range(len(patient_right_cc_PI)):
     df = df.append(new_df)
     
 
-# Filtro pacientes izquierda
-# patient_left_cc_PI = filter_patient(cc_filter,'L') # filtro derecha
 
-# #patient_right_cc_PI = patient_right_cc_PI[:3] # corremos solo 3 datos porque es tardado procesar todo
-# for full in range(len(patient_left_cc_PI)):
+# # Patient filter - RIGHT MLO
+# patient_right_mlo_PI = filter_patient(calc_trainig_data_file,'R', 'MLO') # filtro derecha
+# # Patient filter - LEFT CC
+# patient_left_cc_PI = filter_patient(calc_trainig_data_file,'L', 'CC') # filtro derecha
+# # Patient filter - LEFT MLO
+# patient_left_mlo_PI = filter_patient(calc_trainig_data_file,'L', 'MLO') # filtro derecha
+
+
+# # Listas Vacias para el Dataframe
+# list_data = []
+# # Columnas del DataFrame
+# columnas = ['ID','n ROIs', 'ROI', 'Area', 'Perimetro',
+#                                       'Densidad', 'Compacidad', 'Contraste', 'Uniformidad' ]
+# df = pd.DataFrame(list_data, columns=columnas)
+
+# patient_right_cc_PI = patient_right_cc_PI[:2] # corremos solo 3 datos porque es tardado procesar todo
+# for full in range(len(patient_right_cc_PI)):
 #     # Lectura de directorios
-#     path_L_full, path_L_ROI, data = directory_read(metadata,patient_left_cc_PI, full)
-#     list_data = [(data, len(path_L_ROI), '', '', '', '', '', '', '')]
+#     path_R_full, path_R_ROI, data = directory_read(metadata,patient_right_cc_PI, full)
+#     list_data = [(data, len(path_R_ROI), '', '', '', '', '', '', '')]
 #     new_dataframe = pd.DataFrame(list_data, columns=columnas)
 #     df = df.append(new_dataframe)
     
 #     print(f'--------FULL IMAGE {data}--------')
-#     new_df = image_proccess(path_L_full, path_L_ROI, data)  # Right data
+#     new_df = image_proccess(path_R_full, path_R_ROI, data)  # Right data
 #     df = df.append(new_df)
+    
+
+#Filtro pacientes izquierda
+patient_left_mlo_PI = filter_patient(calc_trainig_data_file,'L', 'CC') # filtro derecha
+#patient_right_cc_PI = filter_patient(calc_trainig_data_file,'R', 'MLO') # filtro derecha
+
+patient_left_mlo_PI = patient_left_mlo_PI[:1] # corremos solo 3 datos porque es tardado procesar todo
+for full in range(len(patient_left_mlo_PI)):
+    # Lectura de directorios
+    path_L_full, path_L_ROI, data = directory_read(metadata,patient_left_mlo_PI, full)
+    list_data = [(data, len(path_L_ROI), '', '', '', '', '', '', '')]
+    new_dataframe = pd.DataFrame(list_data, columns=columnas)
+    df = df.append(new_dataframe)
+    
+    print(f'--------FULL IMAGE {data}--------')
+    new_df = image_proccess(path_L_full, path_L_ROI, data)  # Right data
+    df = df.append(new_df)
+
 
 
 
 
 # Guarda datos en CSV:
 df.to_csv('data/Caracteristicas_CC.csv', header=True, index=False)
+
 
 
 

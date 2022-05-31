@@ -1,2 +1,4 @@
 calc_case_description_train_set.csv
 metadata.csv
+*.csv
+CBIS-DDSM

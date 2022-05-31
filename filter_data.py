@@ -6,19 +6,19 @@ Created on Fri May 20 17:57:44 2022
 """
 
 import pandas as pd
-from collections import OrderedDict
-import numpy as np
+#from collections import OrderedDict
+#import numpy as np
 
 # Read Dataframe 
-calc_training_data_file = pd.read_csv('calc_case_description_train_set.csv',  index_col=False)
+calc_training_data_file = pd.read_csv('data/calc_case_description_train_set.csv',  index_col=False)
 
 #patien id filter
-patient_id = calc_training_data_file["patient_id"].tolist() # Get list of patients
-patient_id = set(patient_id)    # Delete duplicates in patients
+patient_id   = calc_training_data_file["patient_id"].tolist() # Get list of patients
+patient_id   = set(patient_id)    # Delete duplicates in patients
 patient_list = list(patient_id)   # Convert to list again
 
 # Read again Dataframe because I had problems with patients
-calc_training_data_file = pd.read_csv('calc_case_description_train_set.csv',  index_col=0)
+calc_training_data_file = pd.read_csv('data/calc_case_description_train_set.csv',  index_col=0)
 
 patients_filtered = []  
 
@@ -35,10 +35,7 @@ patients_filtered = sorted(patients_filtered) # Sort the list
 # Datframe Filtered with the correct cases
 df = calc_training_data_file.loc[patients_filtered]
 
-
-
-
-
+df.to_csv('data/data_filtered.csv')
 
 
 # Filtering individually cases
