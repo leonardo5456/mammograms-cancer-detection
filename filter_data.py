@@ -35,7 +35,7 @@ patients_filtered = sorted(patients_filtered) # Sort the list
 # Datframe Filtered with the correct cases
 df = calc_training_data_file.loc[patients_filtered]
 
-df.to_csv('data/data_filtered.csv')
+#df.to_csv('data/data_filtered.csv')
 
 
 # Filtering individually cases

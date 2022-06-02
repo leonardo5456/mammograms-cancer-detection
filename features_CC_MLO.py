@@ -97,10 +97,10 @@ def image_proccess(path_R_full, path_R_ROI, data):
         #print(f'{data}_{cont}')
         print(ID)
         
-        plt.figure()
-        plt.suptitle(f'{data}_{cont}')
-        plt.imshow(ImROI, cmap = 'gray')
-        plt.axis('off')
+        # plt.figure()
+        # plt.suptitle(f'{data}_{cont}')
+        # plt.imshow(ImROI, cmap = 'gray')
+        # plt.axis('off')
         
         #Creación de Imagen que únicamente contiene el área de Interés con la unidad
         IdentidadROI = np.zeros((u,v)) #Mascara de zeros del tamaño de ROI
@@ -113,10 +113,10 @@ def image_proccess(path_R_full, path_R_ROI, data):
         ImagenInteres = np.multiply(ImFull,IdentidadROI)
         
         #Muestra de la región de interés de la mamografía
-        plt.figure('Region de Interes de la Mamografía')
-        plt.imshow(ImagenInteres, cmap = 'gray')
-        plt.axis('off')
-        plt.show()
+        # plt.figure('Region de Interes de la Mamografía')
+        # plt.imshow(ImagenInteres, cmap = 'gray')
+        # plt.axis('off')
+        # plt.show()
         
         #Obtención de Características Relevantes
         _, ImaBin = cv2.threshold(ImagenInteres,0,255,cv2.THRESH_BINARY) #Binarización de la Imagen
@@ -137,10 +137,10 @@ def image_proccess(path_R_full, path_R_ROI, data):
         imgOut = ImagenInteres[y-ME:y+h+ME, x-ME:x+w+ME]
         
         #Muestra de la región de interés de la mamografía
-        plt.figure('Region de Interes de la Mamografía BOX')
-        plt.imshow(imgOut, cmap = 'gray')
-        plt.axis()
-        plt.show()
+        # plt.figure('Region de Interes de la Mamografía BOX')
+        # plt.imshow(imgOut, cmap = 'gray')
+        # plt.axis()
+        # plt.show()
     
         #Extraccion de area
         u_Out, v_Out= np.shape(imgOut)
@@ -188,11 +188,11 @@ def image_proccess(path_R_full, path_R_ROI, data):
         new_df = pd.DataFrame(list_data, columns=columnas)
         df = df.append(new_df)
         
-    plt.figure('Mamografía Original')
-    plt.suptitle('Full Mammografia')
-    plt.imshow(ImFull, cmap = 'gray')
-    plt.axis('off')
-    plt.show()
+    # plt.figure('Mamografía Original')
+    # plt.suptitle('Full Mammografia')
+    # plt.imshow(ImFull, cmap = 'gray')
+    # plt.axis('off')
+    # plt.show()
     
     return df
     
@@ -210,16 +210,15 @@ calc_trainig_data_file = pd.read_csv('data/data_filtered.csv', index_col=False)
 
 pathology_data = calc_trainig_data_file[['patient_id','pathology']]
 
-pathology = calc_trainig_data_file['assessment'].tolist()
+#pathology = calc_trainig_data_file['assessment'].tolist()
+pathology = calc_trainig_data_file['abnormality id'].tolist()
 pathology = set(pathology)
 
 
-''' Filter data with steps:
-        RIGHT-CC,  RIGHT-MLO, LEFT-CC, LEFT-MLO
-'''
+''' Filter data with steps: RIGHT-CC,  RIGHT-MLO, LEFT-CC, LEFT-MLO '''
 
 # Patient filter - RIGHT CC
-patient_right_cc_PI = filter_patient(calc_trainig_data_file,'R', 'MLO') # filtro derecha
+patient_right_cc_PI = filter_patient(calc_trainig_data_file,'R', 'CC') # filtro derecha
 
 ''' DataFrame Cration '''
 # Listas Vacias para el Dataframe
@@ -229,18 +228,23 @@ columnas = ['ID','n ROIs', 'ROI', 'Area', 'Perimetro',
                                       'Densidad', 'Compacidad', 'Contraste', 'Uniformidad' ]
 df = pd.DataFrame(list_data, columns=columnas)
 
-patient_right_cc_PI = patient_right_cc_PI[:1] # corremos solo 3 datos porque es tardado procesar todo
+#patient_right_cc_PI = patient_right_cc_PI[:1] # corremos solo 3 datos porque es tardado procesar todo
+patient_right_cc_PI = ['P_00613','P_00631' ,'P_00635']
 for full in range(len(patient_right_cc_PI)):
-    # Lectura de directorios
-    path_R_full, path_R_ROI, data = directory_read(metadata,patient_right_cc_PI, full)
-    list_data = [(data, len(path_R_ROI), '', '', '', '', '', '', '')]
-    new_dataframe = pd.DataFrame(list_data, columns=columnas)
-    df = df.append(new_dataframe)
-    
-    print(f'--------FULL IMAGE {data}--------')
-    new_df = image_proccess(path_R_full, path_R_ROI, data)  # Right data
-    df = df.append(new_df)
-    
+    try:
+        # Lectura de directorios
+        path_R_full, path_R_ROI, data = directory_read(metadata,patient_right_cc_PI, full)
+        list_data = [(data, len(path_R_ROI), '', '', '', '', '', '', '')]
+        new_dataframe = pd.DataFrame(list_data, columns=columnas)
+        df = df.append(new_dataframe)
+            
+        print(f'--------FULL IMAGE {data}--------')
+        new_df = image_proccess(path_R_full, path_R_ROI, data)  # Right data
+        df = df.append(new_df)
+    except Exception as e: 
+        print(repr(e))
+
+        
 
 
 # # Patient filter - RIGHT MLO
@@ -271,28 +275,28 @@ for full in range(len(patient_right_cc_PI)):
 #     df = df.append(new_df)
     
 
-#Filtro pacientes izquierda
-patient_left_mlo_PI = filter_patient(calc_trainig_data_file,'L', 'CC') # filtro derecha
-#patient_right_cc_PI = filter_patient(calc_trainig_data_file,'R', 'MLO') # filtro derecha
+# #Filtro pacientes izquierda
+# patient_left_mlo_PI = filter_patient(calc_trainig_data_file,'L', 'CC') # filtro derecha
+# #patient_right_cc_PI = filter_patient(calc_trainig_data_file,'R', 'MLO') # filtro derecha
 
-patient_left_mlo_PI = patient_left_mlo_PI[:1] # corremos solo 3 datos porque es tardado procesar todo
-for full in range(len(patient_left_mlo_PI)):
-    # Lectura de directorios
-    path_L_full, path_L_ROI, data = directory_read(metadata,patient_left_mlo_PI, full)
-    list_data = [(data, len(path_L_ROI), '', '', '', '', '', '', '')]
-    new_dataframe = pd.DataFrame(list_data, columns=columnas)
-    df = df.append(new_dataframe)
+# patient_left_mlo_PI = patient_left_mlo_PI[:1] # corremos solo 3 datos porque es tardado procesar todo
+# for full in range(len(patient_left_mlo_PI)):
+#     # Lectura de directorios
+#     path_L_full, path_L_ROI, data = directory_read(metadata,patient_left_mlo_PI, full)
+#     list_data = [(data, len(path_L_ROI), '', '', '', '', '', '', '')]
+#     new_dataframe = pd.DataFrame(list_data, columns=columnas)
+#     df = df.append(new_dataframe)
     
-    print(f'--------FULL IMAGE {data}--------')
-    new_df = image_proccess(path_L_full, path_L_ROI, data)  # Right data
-    df = df.append(new_df)
+#     print(f'--------FULL IMAGE {data}--------')
+#     new_df = image_proccess(path_L_full, path_L_ROI, data)  # Right data
+#     df = df.append(new_df)
 
 
 
 
 
 # Guarda datos en CSV:
-df.to_csv('data/Caracteristicas_CC.csv', header=True, index=False)
+df.to_csv('data/00_Caracteristicas_R_CC.csv', header=True, index=False)
 
 
 
