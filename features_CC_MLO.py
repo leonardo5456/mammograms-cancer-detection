@@ -218,7 +218,7 @@ pathology = set(pathology)
 ''' Filter data with steps: RIGHT-CC,  RIGHT-MLO, LEFT-CC, LEFT-MLO '''
 
 # Patient filter - RIGHT CC
-patient_right_cc_PI = filter_patient(calc_trainig_data_file,'R', 'CC') # filtro derecha
+patient_right_cc_PI = filter_patient(calc_trainig_data_file,'L', 'MLO') # filtro derecha
 
 ''' DataFrame Cration '''
 # Listas Vacias para el Dataframe
@@ -227,9 +227,11 @@ list_data = []
 columnas = ['ID','n ROIs', 'ROI', 'Area', 'Perimetro',
                                       'Densidad', 'Compacidad', 'Contraste', 'Uniformidad' ]
 df = pd.DataFrame(list_data, columns=columnas)
+error_list = []
+data = ''
 
-#patient_right_cc_PI = patient_right_cc_PI[:1] # corremos solo 3 datos porque es tardado procesar todo
-patient_right_cc_PI = ['P_00613','P_00631' ,'P_00635']
+#patient_right_cc_PI = patient_right_cc_PI[:2] # corremos solo 3 datos porque es tardado procesar todo
+#patient_right_cc_PI = ['P_00631_RIGHT_CC' ,'P_00635_RIGHT_CC','P_00635']
 for full in range(len(patient_right_cc_PI)):
     try:
         # Lectura de directorios
@@ -241,8 +243,11 @@ for full in range(len(patient_right_cc_PI)):
         print(f'--------FULL IMAGE {data}--------')
         new_df = image_proccess(path_R_full, path_R_ROI, data)  # Right data
         df = df.append(new_df)
-    except Exception as e: 
-        print(repr(e))
+    #except Exception as e: 
+    except:
+        print('\n chales carnal :v \n')
+        #print(repr(e))
+        error_list.append(data)
 
         
 
@@ -296,7 +301,7 @@ for full in range(len(patient_right_cc_PI)):
 
 
 # Guarda datos en CSV:
-df.to_csv('data/00_Caracteristicas_R_CC.csv', header=True, index=False)
+df.to_csv('data/03_Caracteristicas_L_MLO.csv', header=True, index=False)
 
 
 
