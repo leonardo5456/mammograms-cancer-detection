@@ -82,4 +82,4 @@ y = x['assessment'].tolist()
 
 new_df = df_filtered.assign(assessment = y) # add a new column to the dataframe
 # Guarda datos en CSV:
-new_df.to_csv('data/data_for_training_features.csv', header=True, index=False)
+#new_df.to_csv('data/data_for_training_features.csv', header=True, index=False)
