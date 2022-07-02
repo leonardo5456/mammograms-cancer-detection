@@ -2,7 +2,11 @@
 """
 Created on Tue May 31 13:24:52 2022
 
-@author: leoes
+@author: Leonardo Juarez Morales
+
+@Description:
+    Detection of features in mammograms for cancer detection.
+
 """
 
 import pandas as pd
@@ -201,14 +205,21 @@ def image_proccess(path_R_full, path_R_ROI, data):
 '''Main'''
 # Reading file "metadata" for images location
 metadata = pd.read_csv('data/metadata.csv',index_col=False) 
-metadata = metadata[metadata["File Location"].str.startswith('.\CBIS-DDSM\Calc-Training')]
+# Data for training
+#metadata = metadata[metadata["File Location"].str.startswith('.\CBIS-DDSM\Calc-Training')]
+# Data for testing 
+metadata = metadata[metadata["File Location"].str.startswith('.\CBIS-DDSM\Calc-Test')]
 # Reading file "data_filtered" for the cases and patology
-calc_trainig_data_file = pd.read_csv('data/data_filtered.csv', index_col=False) 
+
+# Data filtered for training
+#calc_trainig_data_file = pd.read_csv('data/data_filtered.csv', index_col=False) 
+
+# Data for testing
+calc_trainig_data_file = pd.read_csv('data/calc_case_description_test_set.csv', index_col=False) 
 
 #Filtro CC en dataset
 #cc_filter = calc_trainig_data_file[calc_trainig_data_file["image view"].str.startswith('CC')]
-
-pathology_data = calc_trainig_data_file[['patient_id','pathology']]
+#pathology_data = calc_trainig_data_file[['patient_id','pathology']]
 
 #pathology = calc_trainig_data_file['assessment'].tolist()
 pathology = calc_trainig_data_file['abnormality id'].tolist()
@@ -218,7 +229,7 @@ pathology = set(pathology)
 ''' Filter data with steps: RIGHT-CC,  RIGHT-MLO, LEFT-CC, LEFT-MLO '''
 
 # Patient filter - RIGHT CC
-patient_right_cc_PI = filter_patient(calc_trainig_data_file,'L', 'MLO') # filtro derecha
+patient_right_cc_PI = filter_patient(calc_trainig_data_file,'L', 'CC') # filtro derecha
 
 ''' DataFrame Cration '''
 # Listas Vacias para el Dataframe
@@ -230,7 +241,7 @@ df = pd.DataFrame(list_data, columns=columnas)
 error_list = []
 data = ''
 
-#patient_right_cc_PI = patient_right_cc_PI[:2] # corremos solo 3 datos porque es tardado procesar todo
+#patient_right_cc_PI = patient_right_cc_PI[:1] # corremos solo 3 datos porque es tardado procesar todo
 #patient_right_cc_PI = ['P_00631_RIGHT_CC' ,'P_00635_RIGHT_CC','P_00635']
 for full in range(len(patient_right_cc_PI)):
     try:
@@ -301,7 +312,9 @@ for full in range(len(patient_right_cc_PI)):
 
 
 # Guarda datos en CSV:
-df.to_csv('data/03_Caracteristicas_L_MLO.csv', header=True, index=False)
+#df.to_csv('data/03_Caracteristicas_L_MLO.csv', header=True, index=False)
+df.to_csv('data/03_TEST_Caracteristicas_L_CC.csv', header=True, index=False)
+print("process finished")
 
 
 

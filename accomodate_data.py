@@ -12,17 +12,32 @@ Created on Fri Jun  3 21:54:01 2022
 
 import pandas as pd
 
+'''Data for training'''
 # read data processed with features 
-data_1 = pd.read_csv('data/00_Caracteristicas_R_CC.csv')
-data_2 = pd.read_csv('data/01_Caracteristicas_L_CC.csv')
-data_3 = pd.read_csv('data/02_Caracteristicas_R_MLO.csv')
-data_4 = pd.read_csv('data/03_Caracteristicas_L_MLO.csv')
+# data_1 = pd.read_csv('data/00_Caracteristicas_R_CC.csv')
+# data_2 = pd.read_csv('data/01_Caracteristicas_L_CC.csv')
+# data_3 = pd.read_csv('data/02_Caracteristicas_R_MLO.csv')
+# data_4 = pd.read_csv('data/03_Caracteristicas_L_MLO.csv')
+# # Read original data 
+# calc_training_data_file = pd.read_csv('data/data_filtered.csv')
+
+'''Data for testing'''
+# read data processed with features 
+data_1 = pd.read_csv('data/00_TEST_Caracteristicas_R_MLO.csv')
+data_2 = pd.read_csv('data/01_TEST_Caracteristicas_L_MLO.csv')
+data_3 = pd.read_csv('data/02_TEST_Caracteristicas_R_CC.csv')
+data_4 = pd.read_csv('data/03_TEST_Caracteristicas_L_CC.csv')
 # Read original data 
-calc_training_data_file = pd.read_csv('data/data_filtered.csv')
+calc_training_data_file = pd.read_csv('data/calc_case_description_test_set.csv')
+
+
 # patient id filter
 patient_id_2 = calc_training_data_file['patient_id'].tolist()
 patient_id_2 = [i[:7] for i in patient_id_2] # taking just ID patient
-calc_training_data_file = pd.read_csv('data/data_filtered.csv',  index_col=0)
+# training file
+#calc_training_data_file = pd.read_csv('data/data_filtered.csv',  index_col=0)
+# test file
+calc_training_data_file = pd.read_csv('data/calc_case_description_test_set.csv',  index_col=0)
 
 
 
@@ -35,15 +50,24 @@ data = data.sort_values('ID')
 df_filtered = data.dropna(subset=['ROI'])     # Detele NaN values in df
 df_filtered = df_filtered.drop(['ROI', 'n ROIs'], axis=1)   # Delete columns 'ROI' and 'n ROIs'
 
-''' it found a problem with the patient P_00474, it is neccesary t delete it '''
-# P_00474 has a missing data
-P_00474 = ['P_00474']
-# Deleting P_00474, wich present problems from data_filter
-df_filtered = df_filtered[df_filtered["ID"] != "P_00474_LEFT_CC_1"]
+# ''' it found a problem with the patient P_00474, it is neccesary t delete it for training cases'''
+# # P_00474 has a missing data
+# P_00474 = ['P_00474']
+# # Deleting P_00474, wich present problems from data_filter
+# df_filtered = df_filtered[df_filtered["ID"] != "P_00474_LEFT_CC_1"]
+# # Deleting P_00474 in Calc_training_data_file
+# calc_training_data_file = calc_training_data_file.drop(['P_00474'])
+
+''' it found a problem with the patient P_00353, it is neccesary t delete it for training cases'''
+P_00353 = ['P_00353']
+# Deleting P_00535, wich present problems from data_filter
+df_filtered = df_filtered[(df_filtered["ID"] != "P_00353_LEFT_CC_1") & (df_filtered["ID"] != "P_00353_LEFT_MLO_1") ]
 # Deleting P_00474 in Calc_training_data_file
-calc_training_data_file = calc_training_data_file.drop(['P_00474'])
+calc_training_data_file = calc_training_data_file.drop(['P_00353'])
 
 
+''' you need to run this part first if you see data inconsistency with the main data 
+with the filtered one'''
 # patient id filter
 patient_id_1 = df_filtered['ID'].tolist()
 patient_id_1 = [i[:7] for i in patient_id_1] # taking just ID patient

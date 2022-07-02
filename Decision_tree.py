@@ -46,20 +46,20 @@ def decision_tree(datasheet):
     
     # Calling to constuctor of the decisition tree
     # max_depth -> number of leven on the tree
-    arbol = DecisionTreeClassifier() # just take 4 branches of the tree
+    arbol = DecisionTreeClassifier(max_depth=6) # just take 4 branches of the tree
     #arbol = DecisionTreeClassifier() # makes the complete tree
     
     # Training the model
     arbol_enfermedad = arbol.fit(x_train, y_train)
     
     #plot tree fig
-    #fig = plt.figure(figsize=(25,20))
+    fig = plt.figure(figsize=(25,20))
     #fig = plt.figure(figsize=(170,160))
     #fig = plt.figure(figsize=(370,360))
     # fig = plt.figure(figsize=(380,370))
-    # tree.plot_tree(arbol_enfermedad, feature_names=list(x.columns.values),
-    #                class_names=list(y.values), filled=True)
-    # plt.show()
+    tree.plot_tree(arbol_enfermedad, feature_names=list(x.columns.values),
+                    class_names=list(y.values), filled=True)
+    plt.show()
     
     # save image 
     #fig.savefig("decision_tree_1.png")
@@ -94,3 +94,26 @@ precision_5 = ((matriz_small[2,2])) / sum(matriz_small[2,])
 precision_global_big = np.sum(matriz_big.diagonal()) / np.sum(matriz_big)
 precision_2 = ((matriz_big[0,0])) / sum(matriz_big[0,])
 precision_4 = ((matriz_big[1,1])) / sum(matriz_big[1,])
+
+precision_globaL = (precision_global_small + precision_global_big) / 2
+
+
+
+# lista = [
+# 0.2608695652173913,
+# 0.635593220338983,
+# 0.15,
+# 0.6625766871165644,
+# 0.47368421052631576]
+
+# list_values= sum(lista) / len(lista)
+
+
+# lista2 = [
+#     0.6666666666666666,
+#     0.773109243697479,
+#     0.7894736842105263,
+#     0.8823529411764706,
+#     0.7058823529411765
+#     ]
+# list_values= sum(lista2) / len(lista2)
